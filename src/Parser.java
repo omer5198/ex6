@@ -26,12 +26,26 @@ public class Parser {
     private static String METHOD_DECLARING_REGEX = " *void " + VALID_METHOD_NAME_REGEX + " *\\( *" +"(?:"+
             METHOD_PARAMETER_REGEX + " *(?:(?: *, *" + METHOD_PARAMETER_REGEX + ")?)*|) *\\)\\{";
 
+
+
+    private static String STRING_REGEX = "\"\\w*\"";
+
+    private static String INT_REGEX = "\\s*\\d*\\s";
+
+    private static String DOUBLE_REGEX = "(?:\\d*\\.\\d*)";
+
+    private static String BOOLEAN_REGEX = "\\s*(?:true|false|" + INT_REGEX + "|" +
+            DOUBLE_REGEX + ")" ;
+
+
+
 //    private static String METHOD_DECLARING_REGEX_UGLY = " *void [a-zA-Z]+[a-zA-Z0-9_]* *\\( *(?:(?:int|double|String|boolean|char) (?:[a-zA-Z]+[a-zA-Z0-9_]*|_+[a-zA-Z0-9_]+) *(?:(?: *, *(?:int|double|String|boolean|char) (?:[a-zA-Z]+[a-zA-Z0-9_]*|_+[a-zA-Z0-9_]+))?)*|) *\\)\\{";
+
 
     public static void main(String args[]){
 //        System.out.println(VARIABLE_DECLARING_REGEX);
-        Pattern p = Pattern.compile(METHOD_DECLARING_REGEX);
-        Matcher m = p.matcher("void roni(boolean jkj, int a  , char w, String _s){");
+        Pattern p = Pattern.compile(BOOLEAN_REGEX);
+        Matcher m = p.matcher("hi");
         Pattern variablePossibleValue = Pattern.compile(VARIABLE_POSSIBLE_VALUES_REGEX);
         Matcher variablePossibleValueMatcher = variablePossibleValue.matcher("");
         System.out.println(m.matches());
