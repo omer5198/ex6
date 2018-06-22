@@ -47,4 +47,21 @@ public class Block {
     public ArrayList<String> getCodeLines() {
         return codeLines;
     }
+
+    public void addLine(String line){
+        codeLines.add(line);
+    }
+
+    //TODO implement
+    public void addDeclaredVariables(String line){
+
+    }
+
+    public Block getParent() {
+        return parent;
+    }
+
+    public boolean isMethod() {
+        return isMethod;
+    }
 }
