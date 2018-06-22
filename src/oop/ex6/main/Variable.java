@@ -23,10 +23,10 @@ public class Variable {
      * This is the constructor of the class. Initializes all parameters
      * @param type The type of the variable
      * @param name The name of the variable
-     * @param isInitialized An indicator to whether the variable is initialized or not
+     * @param initializationLine The line of which it was created
      * @param isGlobal indicates whether the variable is global or not
      */
-    public Variable(String type, String name, boolean isInitialized, boolean isGlobal) {
+    public Variable(String type, String name, int initializationLine, boolean isGlobal) {
         this.type = type;
         this.name = name;
         this.initializationLine = UNINITIALIZED;
