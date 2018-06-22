@@ -7,13 +7,17 @@ package oop.ex6.main;
 
 public class Variable {
 
+    private static int UNINITIALIZED = -1;
+
     private String type;
 
     private String name;
 
-    private boolean initialized;
+    private int initializationLine;
 
     private boolean isGlobal;
+
+    private boolean isFinal;
 
     /**
      * This is the constructor of the class. Initializes all parameters
@@ -25,17 +29,24 @@ public class Variable {
     public Variable(String type, String name, boolean isInitialized, boolean isGlobal) {
         this.type = type;
         this.name = name;
-        this.initialized = initialized;
+        this.initializationLine = UNINITIALIZED;
         this.isGlobal = isGlobal;
-
     }
 
     /**
-     * a getter of initialized
+     * checks if the variable is initialized
      * @return whether is initialized or not
      */
     public boolean isInitialized() {
-        return initialized;
+        return UNINITIALIZED != -1;
+    }
+
+    /**
+     * getter for the initialization line
+     * @return line of the variable's initialization (-1 if uninitialized)
+     */
+    public int getLine() {
+        return initializationLine;
     }
 
     /**
@@ -46,19 +57,17 @@ public class Variable {
         return type;
     }
 
-    /**
-     * a getter for the name of the variable
-     * @return the name of the variable
-     */
-    public String getName() {
-        return name;
-    }
+	/**
+	 * @return Returns whether or not the variable is global
+	 */
+	public boolean isGlobal() {
+		return isGlobal;
+	}
 
-    /**
-     * A getter for isGlobal
-     * @return whether the variable is global or not
-     */
-    public boolean isGlobal() {
-        return isGlobal;
-    }
+	/**
+	 * @return Returns whether or not the variable is final
+	 */
+	public boolean isFinal() {
+		return isFinal;
+	}
 }
