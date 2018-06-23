@@ -13,7 +13,7 @@ public class Block {
 
     private HashMap<String, Variable> blockVariables;
 
-    private ArrayList<String> codeLines;
+    private ArrayList<Tuple<String, Integer>> codeLines;
 
     private boolean isMethod;
 
@@ -24,7 +24,8 @@ public class Block {
      * @param parent the parent block of the current block
 	 * @param isMethod whether or not the block is a method
      */
-    Block(HashMap<String, Variable> blockVariables, Block parent, ArrayList<String> codeLines,
+    Block(HashMap<String, Variable> blockVariables, Block parent,
+		  ArrayList<Tuple<String, Integer>> codeLines,
 		  boolean isMethod){
         this.blockVariables = blockVariables;
         this.parent = parent;
@@ -44,11 +45,11 @@ public class Block {
      * getter for the code lines
      * @return the code lines of the block
      */
-    public ArrayList<String> getCodeLines() {
+    public ArrayList<Tuple<String, Integer>> getCodeLines() {
         return codeLines;
     }
 
-    public void addLine(String line){
+    public void addLine(Tuple<String, Integer> line){
         codeLines.add(line);
     }
 
@@ -64,4 +65,19 @@ public class Block {
     public boolean isMethod() {
         return isMethod;
     }
+
+    public Variable getVariable(String name) {
+    	Block current = this;
+    	Variable variable = null;
+    	while(current != null && variable == null) {
+    		HashMap<String, Variable> blockVariables = current.getVariablesInBlock();
+    		variable = blockVariables.get(name);
+    		current = current.getParent();
+		}
+		return variable;
+	}
+
+	public Variable getLocalVariable(String name) {
+    	return blockVariables.get(name);
+	}
 }
