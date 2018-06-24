@@ -22,11 +22,21 @@ public class Parser {
             VARIABLE_POSSIBLE_VALUES_REGEX + ("(?:" + " *, *" + (VALID_VARIABLE_NAME_REGEX +
             VARIABLE_POSSIBLE_VALUES_REGEX ) + ")" + "?" + "\\*");
 
-    private static String IF_OR_WHILE_REGEX = " *(?:if|while) *\\((?: *[a-zA-Z]+[a-zA-Z0-9_]*|_+" +
-            "[a-zA-Z0-9_]+) *(?:(?:(?:\\|\\||&&) *(?:[a-zA-Z]+[a-zA-Z0-9_]*|_+[a-zA-Z0-9_]+) *)?)*\\) *\\{";
+    private static String IF_OR_WHILE_REGEX = "\\s*(?:if|while)\\s*\\((?:\\s*[a-zA-Z]+[a-zA-Z0-9_]*|_+ " +
+            "[a-zA-Z0-9_]+|\\s*(?:\\d+|\\d+\\.\\d+))\\s*(?:(?:\\|\\||&&)\\s*(?:[a-zA-Z]+[a-zA-Z0-9_]*|" +
+            "_+[a-zA-Z0-9_]+|\\s*(?:\\d+|\\d+\\.\\d+))\\s*)*\\)\\s*\\{";
 
     private static String METHOD_DECLARING_REGEX = " *void " + VALID_METHOD_NAME_REGEX + " *\\( *" +"(?:"+
             METHOD_PARAMETER_REGEX + " *(?:(?: *, *" + METHOD_PARAMETER_REGEX + ")?)*|) *\\)\\{";
+
+    private static String CONDITION_GROUPING_REGEX = "(?:\\(|\\|\\||\\&\\&)?\\s*(.+?)\\" +
+            "s*(?:\\)|\\|\\||\\&\\&)+";
+
+
+    private static String METHOD_CALL_REGEX_UGLY = "[a-zA-Z]+[a-zA-Z0-9_]*\\s*\\(\\s*(?:(?:\".*?\"|" +
+            "\\s*\\d+\\s*|\\s*\\d+\\.\\d+\\s*|\\s*(?:true|false)|'.??'|(?:[a-zA-Z]+[a-zA-Z0-9_]*|" +
+            "_+[a-zA-Z0-9_]+))\\s*(?:\\s*,\\s*(?:\".*?\"|\\s*\\d+\\s*|\\s*\\d+\\.\\d+\\s*|\\s*" +
+            "(?:true|false)|'.??'|(?:[a-zA-Z]+[a-zA-Z0-9_]*|_+[a-zA-Z0-9_]+)))*?|)\\s*\\);$";
 
 
 
