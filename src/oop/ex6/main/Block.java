@@ -15,22 +15,22 @@ public class Block {
 
     private ArrayList<Tuple<String, Integer>> codeLines;
 
-    private Method method;
+    private Boolean isMethod;
 
     /**
      * The constructor of the block. It receives a hashmap of the variables in it's scope (and in outer
      * scopes)
      * @param blockVariables The hashmap of variables
      * @param parent the parent block of the current block
-	 * @param method the method of the block if exists, null otherwise
+	 * @param isMethod whether the block is method or not
      */
     Block(HashMap<String, Variable> blockVariables, Block parent,
 		  ArrayList<Tuple<String, Integer>> codeLines,
-		  Method method){
+		  Boolean isMethod){
         this.blockVariables = blockVariables;
         this.parent = parent;
         this.codeLines = codeLines;
-        this.method = method;
+        this.isMethod = isMethod;
     }
 
     /**
@@ -62,12 +62,8 @@ public class Block {
         return parent;
     }
 
-    public boolean isMethod() {
-        return method != null;
-    }
-
-	public Method getMethod() {
-		return method;
+	public boolean isMethod() {
+    	return isMethod;
 	}
 
 	public Variable getVariable(String name) {
