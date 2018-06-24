@@ -16,15 +16,16 @@ public class VariableValidator {
 
 	final static private String BOOLEAN_ID = "boolean";
 
-	final static private String INT_REGEX = "";
+	final static private String INT_REGEX = "\\d+";
 
-	final static private String STRING_REGEX = "";
+	final static private String STRING_REGEX = "\".*\"";
 
-	final static private String CHAR_REGEX = "";
+	final static private String CHAR_REGEX = "\'.\'";
 
-	final static private String DOUBLE_REGEX = "";
+	final static private String DOUBLE_REGEX = "\\d+(?:\\.\\d+)?";
 
-	final static private String BOOLEAN_REGEX = "^(?:0|1|true|false)";
+	final static private String BOOLEAN_REGEX = "\\s*(?:true|false|" + INT_REGEX + "|" +
+			DOUBLE_REGEX + ")";
 
 	final static private String INVALID_TYPE_MSG = "Invalid type provided";
 
@@ -69,14 +70,13 @@ public class VariableValidator {
 		}
 	}
 
-	public ArrayList<Variable> getVariables(Tuple<String, Integer> line, Block block, boolean isGlobal,
-											boolean isFinal)
+	public static ArrayList<Variable> getVariables(Tuple<String, Integer> line, Block block, boolean isFinal)
 			throws VariableException {
-		return getVariables(line, block, null, isGlobal, isFinal);
+		return getVariables(line, block, null, isFinal);
 	}
 
-	public ArrayList<Variable> getVariables(Tuple<String, Integer> line, Block block, String type,
-											boolean isGlobal, boolean isFinal)
+	public static ArrayList<Variable> getVariables(Tuple<String, Integer> line, Block block, String type,
+											boolean isFinal)
 			throws VariableException {
 		ArrayList<Variable> variables = new ArrayList<>();
 		String text = line.getFirst();
@@ -101,18 +101,28 @@ public class VariableValidator {
 					throw new InvalidTypeException(INVALID_TYPE_MSG + msgSuffix);
 				}
 				if(value != null) {
-					Matcher matcher = pattern.matcher(value);
-					if (!matcher.matches()) {
-						// if the value doesn't match the type
-						throw new InvalidValueException(INVALID_VALUE_MSG + msgSuffix);
+					pattern = getPattern(type);
+					Variable secondVariable = block.getVariable(value);
+					if(secondVariable != null) {
+						checkVariableUsability(secondVariable, lineNumber, msgSuffix);
+						String type2 = secondVariable.getType();
+						compareTypes(type, type2, msgSuffix);
 					}
-					Variable newVariable = new Variable(type, name, lineNumber, isGlobal, isFinal);
+					else {
+						Matcher matcher = pattern.matcher(value);
+						if (!matcher.matches()) {
+							// if the value doesn't match the type
+							throw new InvalidValueException(INVALID_VALUE_MSG + msgSuffix);
+						}
+					}
+					Variable newVariable = new Variable(type, name, lineNumber, block.getParent() == null,
+							isFinal);
 					variables.add(newVariable);
 				}
 				else {
 					// in case value wasn't given (variable wasn't initialized)
 					Variable newVariable = new Variable(type, name, Variable.UNINITIALIZED,
-							isGlobal, isFinal);
+							block.getParent() == null, isFinal);
 					variables.add(newVariable);
 				}
 			} else {
@@ -124,20 +134,10 @@ public class VariableValidator {
 				pattern = getPattern(variable.getType());
 				Variable secondVariable = block.getVariable(value);
 				if(secondVariable != null) {
-					if(!secondVariable.isInitialized()) {
-						// if trying to use an uninitialized variable
-						throw new UninitializedException(UNINITIALIZED_VAR_MSG + msgSuffix);
-					}
-					if(variable.getLine() < secondVariable.getLine() && !secondVariable.isGlobal()) {
-						// in case of trying to reach a variable that wasn't defined yet
-						throw new VariableException(INVALID_VAR_MSG + msgSuffix);
-					}
+					checkVariableUsability(secondVariable, lineNumber, msgSuffix);
 					String type1 = variable.getType();
 					String type2 = secondVariable.getType();
-					if(!(type1 == type2 || type1 == BOOLEAN_ID && (type2 == INT_ID || type2 == DOUBLE_ID) ||
-							type1 == DOUBLE_ID && type2 == INT_ID)) {
-						throw new InvalidTypeException(UNMATCHING_TYPE_MSG + msgSuffix);
-					}
+					compareTypes(type1, type2, msgSuffix);
 				}
 				else {
 					Matcher matcher = pattern.matcher(value);
@@ -150,7 +150,7 @@ public class VariableValidator {
 		return variables;
 	}
 
-	private Pattern getPattern(String type) throws InvalidTypeException{
+	private static Pattern getPattern(String type) throws InvalidTypeException{
 		switch(type) {
 			case INT_ID:
 				return INT_PATTERN;
@@ -165,6 +165,49 @@ public class VariableValidator {
 			default:
 				throw new InvalidTypeException(INVALID_TYPE_MSG);
 		}
+	}
+
+	static void compareTypes(String type1, String type2, String msgSuffix) throws VariableException {
+		if(!(type1 == type2 || type1 == BOOLEAN_ID && (type2 == INT_ID || type2 == DOUBLE_ID) ||
+				type1 == DOUBLE_ID && type2 == INT_ID)) {
+			throw new InvalidTypeException(UNMATCHING_TYPE_MSG + msgSuffix);
+		}
+	}
+
+	static void checkVariableUsability(Variable var, int lineNumber, String msgSuffix)
+			throws VariableException {
+		if(!var.isInitialized()) {
+			// if trying to use an uninitialized variable
+			throw new UninitializedException(UNINITIALIZED_VAR_MSG + msgSuffix);
+		}
+		if(lineNumber < var.getLine() && !var.isGlobal()) {
+			// in case of trying to reach a variable that wasn't defined yet
+			throw new VariableException(INVALID_VAR_MSG + msgSuffix);
+		}
+	}
+
+	static String getType(String text) {
+		Matcher matcher = INT_PATTERN.matcher(text);
+		if(matcher.matches()) {
+			return INT_ID;
+		}
+		matcher = STRING_PATTERN.matcher(text);
+		if(matcher.matches()) {
+			return STRING_ID;
+		}
+		matcher = CHAR_PATTERN.matcher(text);
+		if(matcher.matches()) {
+			return CHAR_ID;
+		}
+		matcher = DOUBLE_PATTERN.matcher(text);
+		if(matcher.matches()) {
+			return DOUBLE_ID;
+		}
+		matcher = BOOLEAN_PATTERN.matcher(text);
+		if(matcher.matches()) {
+			return BOOLEAN_ID;
+		}
+		return null;
 	}
 
 }

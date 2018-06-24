@@ -1,3 +1,5 @@
+package oop.ex6.main;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,9 +14,9 @@ public class Parser {
     private static String VARIABLE_POSSIBLE_VALUES_REGEX = "(?: *= *(?:\\\"[\\w]\\\"|[0-9]+|(?:true|false)))?"
             ;
 
-    private static String CHECK_TYPES_REGEX = " *(?:int|double|String|boolean|char)";
+    public static String CHECK_TYPES_REGEX = "(?:int|double|String|boolean|char)";
 
-    private static String METHOD_PARAMETER_REGEX = CHECK_TYPES_REGEX + " " + VALID_VARIABLE_NAME_REGEX;
+    private static String METHOD_PARAMETER_REGEX = "\\s*" + CHECK_TYPES_REGEX + " " + VALID_VARIABLE_NAME_REGEX;
 
     private static String VARIABLE_DECLARING_REGEX = CHECK_TYPES_REGEX + " " + VALID_VARIABLE_NAME_REGEX +
             VARIABLE_POSSIBLE_VALUES_REGEX + ("(?:" + " *, *" + (VALID_VARIABLE_NAME_REGEX +
@@ -28,11 +30,11 @@ public class Parser {
 
 
 
-    private static String STRING_REGEX = "\"\\w*\"";
+    private static String STRING_REGEX = "\".*\"";
 
-    private static String INT_REGEX = "\\s*\\d*\\s";
+    private static String INT_REGEX = "\\d+";
 
-    private static String DOUBLE_REGEX = "(?:\\d*\\.\\d*)";
+    private static String DOUBLE_REGEX = "\\d+(?:\\.\\d+)?";
 
     private static String BOOLEAN_REGEX = "\\s*(?:true|false|" + INT_REGEX + "|" +
             DOUBLE_REGEX + ")" ;
