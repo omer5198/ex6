@@ -16,13 +16,13 @@ public class VariableValidator {
 
 	final static private String BOOLEAN_ID = "boolean";
 
-	final static private String INT_REGEX = "\\d+";
+	final static private String INT_REGEX = "-?\\s*\\d+";
 
 	final static private String STRING_REGEX = "\".*\"";
 
 	final static private String CHAR_REGEX = "\'.?\'";
 
-	final static private String DOUBLE_REGEX = "\\d+(?:\\.\\d+)?";
+	final static private String DOUBLE_REGEX = "-?\\s*\\d+(?:\\.\\d+)?";
 
 	final static private String BOOLEAN_REGEX = "\\s*(?:true|false|" + INT_REGEX + "|" +
 			DOUBLE_REGEX + ")";

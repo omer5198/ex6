@@ -10,7 +10,8 @@ public class Sjavac {
 
 	private static void validateFile(String filePath) throws FileNotFoundException, IOException,
 			InvalidBracketsException, MethodInInnerScopeException, VariableException, InvalidLineException,
-	InvalidConditionException, InvalidMethodException{
+	InvalidConditionException, InvalidMethodException, ConditionInOuterScopeError,
+			ParameterException, MethodCallInOuterScopeException{
 		Reader fileReader = new Reader(filePath);
 		ArrayList<String> listOfLines = fileReader.readFile();
 		InitialScanner initialScanner = new InitialScanner(listOfLines);

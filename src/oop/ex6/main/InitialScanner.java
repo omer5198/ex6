@@ -37,6 +37,8 @@ public class InitialScanner {
 
 	private static final Pattern EMPTY_LINE_PATTERN = Pattern.compile(EMPTY_LINE_REGEX);
 
+	private static final String CONDITION_IN_OUTER_SCOPE_ERROR = "If / While found in global scope";
+
     private HashMap<String, Variable> globalVariables; // we need this so that after foing initial scanning
     // we would have access to the global variables since the global scope is not a block (and method returns
     // list of blocks
@@ -61,7 +63,7 @@ public class InitialScanner {
      * @throws MethodCallInOuterScopeException When a method is called not inside a method declaration.
      */
     public Tuple<Block, ArrayList<Block>> initialParse() throws InvalidBracketsException,
-			MethodInInnerScopeException {
+			MethodInInnerScopeException, ConditionInOuterScopeError {
         HashMap<String, Variable> globalVariables = new HashMap<String, Variable>();
         String currLine;
         Block currBlock = new Block(null, false);
@@ -79,7 +81,7 @@ public class InitialScanner {
 						throw new InvalidBracketsException(INVALID_BRACKETS_ERROR + msgSuffix);
 					}
 					currBlock.addLine(new Tuple<>(currLine, lineNumber));
-					blocksList.add(currBlock);
+					blocksList.add(0, currBlock);
 					currBlock = currBlock.getParent(); // curBlock is null iff it is in the outer scope, there
 					// can be no closing of a block in the outer scope
 					addAtEnd = false;
@@ -87,6 +89,9 @@ public class InitialScanner {
 					addAtEnd = true;
 					// block opening
 					if (isLineIfOrWhile(currLine)) {
+						if(currBlock.getParent() == null) {
+							throw new ConditionInOuterScopeError(CONDITION_IN_OUTER_SCOPE_ERROR + msgSuffix);
+						}
 						temp = currBlock;
 						unclosedBlocks++;
 						currBlock = new Block(temp, false);

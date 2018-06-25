@@ -15,8 +15,8 @@ public class ConditionValidator {
 
     private static class ConditionParser {
 
-        private static final String CONDITION_GROUPING_REGEX = "(?:\\(|\\|\\||\\&\\&)?\\s*(.+?)\\" +
-                "s*(?:\\)|\\|\\||\\&\\&)+";
+        private static final String CONDITION_GROUPING_REGEX = "\\s*(?:(?:if|while)\\s*\\(|\\|\\||\\&\\&" +
+                ")?\\s*(.+?)\\s*(?:\\)|\\|\\||\\&\\&)+";
 
         private static final Pattern CONDITION_GROUPING_PATTERN = Pattern.compile(CONDITION_GROUPING_REGEX);
 
@@ -40,7 +40,8 @@ public class ConditionValidator {
             Variable variableForCondition = block.getVariable(condition);
             if (variableForCondition != null){
                 type = variableForCondition.getType();
-            } else{
+            }
+            else{
                 type = VariableValidator.getType(condition);
             }
             try {

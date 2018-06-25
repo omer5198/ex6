@@ -15,7 +15,7 @@ public class Parser {
 
     public static String CHECK_TYPES_REGEX = "(?:String|double|int|boolean|char)";
 
-    private static final String METHOD_PARAMETER_REGEX = "\\s*" + CHECK_TYPES_REGEX + " " +
+    private static final String METHOD_PARAMETER_REGEX = "\\s*" + CHECK_TYPES_REGEX + "\\s+" +
 			VALID_VARIABLE_NAME_REGEX;
 
     private static final String VARIABLE_DECLARING_REGEX = "\\s*(?:(final)\\s+)?(" + CHECK_TYPES_REGEX +
@@ -25,19 +25,21 @@ public class Parser {
 
     private static final String IF_OR_WHILE_REGEX = "\\s*(?:if|while)\\s*\\((?:\\s*[a-zA-Z]+[a-zA-Z0-9_]*|_+ " +
             "[a-zA-Z0-9_]+|\\s*(?:\\d+|\\d+\\.\\d+))\\s*(?:(?:\\|\\||&&)\\s*(?:[a-zA-Z]+[a-zA-Z0-9_]*|" +
-            "_+[a-zA-Z0-9_]+|\\s*(?:\\d+|\\d+\\.\\d+))\\s*)*\\)\\s*\\{";
+            "_+[a-zA-Z0-9_]+|\\s*(?:\\d+|\\d+\\.\\d+))\\s*)*\\)\\s*\\{\\s*";
 
     static final Pattern IF_OR_WHILE_PATTERN = Pattern.compile(IF_OR_WHILE_REGEX);
 
-    private static final String METHOD_DECLARING_REGEX = "\\s*void (" + VALID_METHOD_NAME_REGEX + ") *\\( *" +"(?:"+
-            METHOD_PARAMETER_REGEX + " *(?:(?: *, *" + METHOD_PARAMETER_REGEX + ")?)*|) *\\)\\{";
+    private static final String METHOD_DECLARING_REGEX = "\\s*void\\s+([a-zA-Z]+[a-zA-Z\\d_]*)\\s*\\((?:\\s*" +
+			"(?:final\\s+)?\\s*(?:(?:String|double|int|boolean|char)\\s+(?:_[A-Za-z_\\d]+|[A-Za-z]+" +
+			"[A-Za-z_\\d]*)\\s*,))*(?:\\s*(?:final\\s+)?\\s*(?:(?:String|double|int|boolean|char)\\s+(" +
+			"?:_[A-Za-z_\\d]+|[A-Za-z]+[A-Za-z_\\d]*)\\s*))?\\)\\s*\\{\\s*";
 
     static final Pattern METHOD_DECLARING_PATTERN = Pattern.compile(METHOD_DECLARING_REGEX);
 
-    private static final String METHOD_CALL_REGEX = "([a-zA-Z]+[a-zA-Z0-9_])*\\s*\\(\\s*(?:(?:\".*?\"|" +
+    private static final String METHOD_CALL_REGEX = "\\s*([a-zA-Z]+[a-zA-Z0-9_])*\\s*\\(\\s*(?:(?:\".*?\"|" +
             "\\s*\\d+\\s*|\\s*\\d+\\.\\d+\\s*|\\s*(?:true|false)|'.??'|(?:[a-zA-Z]+[a-zA-Z0-9_]*|" +
             "_+[a-zA-Z0-9_]+))\\s*(?:\\s*,\\s*(?:\".*?\"|\\s*\\d+\\s*|\\s*\\d+\\.\\d+\\s*|\\s*" +
-            "(?:true|false)|'.??'|(?:[a-zA-Z]+[a-zA-Z0-9_]*|_+[a-zA-Z0-9_]+)))*?|)\\s*\\);$";
+            "(?:true|false)|'.??'|(?:[a-zA-Z]+[a-zA-Z0-9_]*|_+[a-zA-Z0-9_]+)))*?|)\\s*\\);\\s*$";
 
     private static final Pattern METHOD_CALL_PATTERN = Pattern.compile(METHOD_CALL_REGEX);
 
@@ -69,7 +71,8 @@ public class Parser {
     }
 
     public static void parseBlock(Block block, HashMap<String, Method> methodHashMap)
-			throws VariableException, InvalidConditionException, InvalidMethodException{
+			throws VariableException, InvalidConditionException, InvalidMethodException,
+			ParameterException, MethodCallInOuterScopeException {
     	boolean isMethod = block.isMethod();
     	ArrayList<Tuple<String, Integer>> lines = block.getCodeLines();
 		Tuple<String, Integer> firstLine = lines.get(0);
@@ -95,7 +98,7 @@ public class Parser {
 			if(matchCondition(line, block)) {
     			continue;
 			}
-			if(matchMethod(line, block, methodHashMap)) {
+			if(matchMethodCall(line, block, methodHashMap)) {
     			continue;
 			}
 			if(matchReturn(line)) {
