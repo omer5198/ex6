@@ -11,9 +11,10 @@ public class MethodParser {
 
 	final static private Pattern PARAMETER_SPLIT_PATTERN = Pattern.compile(PARAMETER_SPLIT_REGEX);
 
-	public static Tuple<ArrayList<Variable>, Method> parseMethod(Tuple<String, Integer> line) {
+	public static Tuple<ArrayList<Variable>, Method> parseMethod(Tuple<String, Integer> line,
+																 String methodName) {
 		ArrayList<Variable> variables = new ArrayList<>();
-		ArrayList<Tuple<String, Boolean>> parameters = new ArrayList<>();
+		ArrayList<String> parameters = new ArrayList<>();
 		String text = line.getFirst();
 		int lineNumber = line.getSecond();
 		Matcher matcher = PARAMETER_SPLIT_PATTERN.matcher(text);
@@ -22,9 +23,9 @@ public class MethodParser {
 			String type = matcher.group(2);
 			String name = matcher.group(3);
 			variables.add(new Variable(type, name, lineNumber, false, isFinal));
-			parameters.add(new Tuple(type, isFinal));
+			parameters.add(type);
 		}
-		Method method = new Method(parameters);
+		Method method = new Method(methodName, parameters);
 		return new Tuple(variables, method);
 	}
 }

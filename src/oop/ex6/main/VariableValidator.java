@@ -145,6 +145,9 @@ public class VariableValidator {
 						throw new InvalidValueException(INVALID_VALUE_MSG + msgSuffix);
 					}
 				}
+				if(variable.isGlobal()) {
+					variables.add(new Variable(variable.getType(), name, lineNumber, false, false));
+				}
 			}
 		}
 		return variables;
