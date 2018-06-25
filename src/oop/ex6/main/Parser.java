@@ -1,5 +1,7 @@
 package oop.ex6.main;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,16 +20,22 @@ public class Parser {
 
     private static String METHOD_PARAMETER_REGEX = "\\s*" + CHECK_TYPES_REGEX + " " + VALID_VARIABLE_NAME_REGEX;
 
-    private static String VARIABLE_DECLARING_REGEX = CHECK_TYPES_REGEX + " " + VALID_VARIABLE_NAME_REGEX +
+    private static String VARIABLE_DECLARING_REGEX = CHECK_TYPES_REGEX + " " + VALID_VARIABLE_NAME_REGEX + //TODO import!!
             VARIABLE_POSSIBLE_VALUES_REGEX + ("(?:" + " *, *" + (VALID_VARIABLE_NAME_REGEX +
             VARIABLE_POSSIBLE_VALUES_REGEX ) + ")" + "?" + "\\*");
+
+    private static Pattern VARIABLE_DECLARING_PATTERN = Pattern.compile(VARIABLE_DECLARING_REGEX);
+
 
     private static String IF_OR_WHILE_REGEX = "\\s*(?:if|while)\\s*\\((?:\\s*[a-zA-Z]+[a-zA-Z0-9_]*|_+ " +
             "[a-zA-Z0-9_]+|\\s*(?:\\d+|\\d+\\.\\d+))\\s*(?:(?:\\|\\||&&)\\s*(?:[a-zA-Z]+[a-zA-Z0-9_]*|" +
             "_+[a-zA-Z0-9_]+|\\s*(?:\\d+|\\d+\\.\\d+))\\s*)*\\)\\s*\\{";
 
-    private static String METHOD_DECLARING_REGEX = " *void " + VALID_METHOD_NAME_REGEX + " *\\( *" +"(?:"+
+    private static String METHOD_DECLARING_REGEX = "\\s*void (" + VALID_METHOD_NAME_REGEX + ") *\\( *" +"(?:"+
             METHOD_PARAMETER_REGEX + " *(?:(?: *, *" + METHOD_PARAMETER_REGEX + ")?)*|) *\\)\\{";
+
+    private static Pattern METHOD_DECLARING_PATTERN = Pattern.compile(METHOD_DECLARING_REGEX);
+
 
     private static String CONDITION_GROUPING_REGEX = "(?:\\(|\\|\\||\\&\\&)?\\s*(.+?)\\" +
             "s*(?:\\)|\\|\\||\\&\\&)+";
@@ -48,6 +56,25 @@ public class Parser {
 
     private static String BOOLEAN_REGEX = "\\s*(?:true|false|" + INT_REGEX + "|" +
             DOUBLE_REGEX + ")" ;
+
+    private static boolean matchPattern(String currLine, Pattern pattern) {
+        Matcher m = pattern.matcher(currLine);
+        return m.matches();
+    }
+
+    public static void parseGlobalBlock(Block blockToParse){
+        int lineNum = 0;
+        HashMap<String, Method> methodsMap = new HashMap<>();
+        while (lineNum < blockToParse.getCodeLines().size()){
+            Tuple<String, Integer> currLineTuple = blockToParse.getCodeLines().get(lineNum);
+            if(matchPattern(currLineTuple.getFirst(), METHOD_DECLARING_PATTERN)){
+                Tuple<ArrayList<Variable>, Method> methodTuple = MethodParser.parseMethod(currLineTuple);
+                Method methodParsed = methodTuple.getSecond();
+                methodsMap.put();
+            }
+            lineNum ++;
+        }
+    }
 
 
 
