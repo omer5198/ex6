@@ -18,7 +18,7 @@ public class MethodCallValidator {
 	private static class MethodCallParser {
 
 		final static private String PARAMETERS_SPLIT_REGEX =
-				"[\\(,]?\\s*+(.+?)\\s*[,\\)]";
+				"[\\(,]?\\s*+([^\\(]+?)\\s*[,\\)]";
 
 		final static private Pattern PARAMETERS_SPLIT_PATTERN = Pattern.compile(PARAMETERS_SPLIT_REGEX);
 
@@ -34,7 +34,8 @@ public class MethodCallValidator {
 
 	public static void valdiateMethodCall(Tuple<String, Integer> line, String methodName, Block block,
 								   HashMap<String, Method> methodHashMap)
-			throws ParameterException, InvalidMethodException, MethodCallInOuterScopeException {
+			throws ParameterException, InvalidMethodException, MethodCallInOuterScopeException,
+			VariableException{
 		String text = line.getFirst();
 		int lineNumber = line.getSecond();
 		String msgSuffix = " | Line " + String.valueOf(lineNumber);
@@ -56,6 +57,13 @@ public class MethodCallValidator {
 			Variable var = block.getVariable(param);
 			String type;
 			if(var != null) {
+				if(!var.isInitialized()) {
+					throw new UninitializedException(VariableValidator.UNINITIALIZED_VAR_MSG + msgSuffix);
+				}
+				if(lineNumber < var.getLine() && !var.isGlobal()) {
+					// in case of trying to reach a variable that wasn't defined yet
+					throw new VariableException(VariableValidator.INVALID_VAR_MSG + msgSuffix);
+				}
 				type = var.getType();
 			}
 			else {
@@ -80,7 +88,7 @@ public class MethodCallValidator {
 	 * @param startingBlock The block we check
 	 * @return true iff the block is somewhere in a method defining block
 	 */
-	private static boolean isBlockInMethod(Block startingBlock){
+	static boolean isBlockInMethod(Block startingBlock){
 		Block currBlock = startingBlock;
 		while(currBlock.getParent() != null){
 			if (currBlock.isMethod()){

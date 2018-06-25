@@ -29,9 +29,6 @@ public class InitialScanner {
     private static final String METHOD_DECLARED_IN_INNER_SCOPE_ERROR =
 			"Method declared not in outer scope";
 
-    private static final String CLOSING_BLOCK_REGEX = "\\s*}\\s*";
-
-    private static final Pattern CLOSING_BLOCK_PATTERN = Pattern.compile(CLOSING_BLOCK_REGEX);
 
 	private static final String EMPTY_LINE_REGEX = "\\s*";
 
@@ -89,7 +86,7 @@ public class InitialScanner {
 					addAtEnd = true;
 					// block opening
 					if (isLineIfOrWhile(currLine)) {
-						if(currBlock.getParent() == null) {
+						if(!MethodCallValidator.isBlockInMethod(currBlock)) {
 							throw new ConditionInOuterScopeError(CONDITION_IN_OUTER_SCOPE_ERROR + msgSuffix);
 						}
 						temp = currBlock;
@@ -106,10 +103,10 @@ public class InitialScanner {
 						currBlock = new Block(temp, true);
 					}
 				}
+				if (addAtEnd) {
+					currBlock.addLine(new Tuple<>(currLine, lineNumber));
+				}
 			}
-			if (addAtEnd) {
-				currBlock.addLine(new Tuple<>(currLine, lineNumber));
-			} // notice that if a block was opened the
             // line will be saved in the new opened block. otherwise, in the current.
             lineNumber ++;
         }
@@ -126,7 +123,7 @@ public class InitialScanner {
     }
 
     private boolean isLineClosingBlock(String line){
-        return matchPattern(CLOSING_BLOCK_PATTERN, line);
+        return matchPattern(Parser.CLOSING_BLOCK_PATTERN, line);
     }
 
     private boolean isLineEmpty(String line){

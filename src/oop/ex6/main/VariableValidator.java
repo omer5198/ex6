@@ -27,19 +27,21 @@ public class VariableValidator {
 	final static private String BOOLEAN_REGEX = "\\s*(?:true|false|" + INT_REGEX + "|" +
 			DOUBLE_REGEX + ")";
 
-	final static private String INVALID_TYPE_MSG = "Invalid type provided";
+	final static String INVALID_TYPE_MSG = "Invalid type provided";
 
-	final static private String INVALID_VALUE_MSG = "Invalid value provided";
+	final static String INVALID_VALUE_MSG = "Invalid value provided";
 
-	final static private String INVALID_FINAL_MSG = "Tried to modify final variable";
+	final static String INVALID_FINAL_MSG = "Tried to modify final variable";
 
-	final static private String INVALID_VAR_MSG = "The variable (in the value) provided doesn't exist";
+	final static String INVALID_VAR_MSG = "The variable (in the value) provided doesn't exist";
 
-	final static private String UNINITIALIZED_VAR_MSG = "Tried to use an uninitialized variable";
+	final static String UNINITIALIZED_VAR_MSG = "Tried to use an uninitialized variable";
 
-	final static private String UNMATCHING_TYPE_MSG = "Variables types don't match";
+	final static String UNMATCHING_TYPE_MSG = "Variables types don't match";
 
-	final static private String ALREADY_EXIST_MSG = "Variable already exists in this scope";
+	final static String ALREADY_EXIST_MSG = "Variable already exists in this scope";
+
+	final static String UNINITIALIZED_FINAL_ERROR = "Uninitialized final exception provided";
 
 	final static private Pattern INT_PATTERN = Pattern.compile(INT_REGEX);
 
@@ -96,7 +98,6 @@ public class VariableValidator {
 					throw new InvalidTypeException(INVALID_TYPE_MSG + msgSuffix);
 				}
 				if(value != null) {
-					pattern = getPattern(type);
 					Variable secondVariable = block.getVariable(value);
 					if(secondVariable != null) {
 						checkVariableUsability(secondVariable, lineNumber, msgSuffix);
@@ -115,6 +116,9 @@ public class VariableValidator {
 					variables.add(newVariable);
 				}
 				else {
+					if(isFinal) {
+						throw new FinalException(UNINITIALIZED_FINAL_ERROR + msgSuffix);
+					}
 					// in case value wasn't given (variable wasn't initialized)
 					Variable newVariable = new Variable(type, name, Variable.UNINITIALIZED,
 							block.getParent() == null, isFinal);
@@ -140,8 +144,11 @@ public class VariableValidator {
 						throw new InvalidValueException(INVALID_VALUE_MSG + msgSuffix);
 					}
 				}
-				if(variable.isGlobal()) {
+				if(variable.isGlobal() && block.getParent() != null) {
 					variables.add(new Variable(variable.getType(), name, lineNumber, false, false));
+				}
+				else {
+					variable.setInitializationLine(lineNumber);
 				}
 			}
 		}
@@ -166,8 +173,8 @@ public class VariableValidator {
 	}
 
 	static void compareTypes(String type1, String type2, String msgSuffix) throws VariableException {
-		if(!(type1 == type2 || type1 == BOOLEAN_ID && (type2 == INT_ID || type2 == DOUBLE_ID) ||
-				type1 == DOUBLE_ID && type2 == INT_ID)) {
+		if(!(type1.equals(type2) || type1.equals(BOOLEAN_ID) && (type2.equals(INT_ID) || type2.equals(DOUBLE_ID)) ||
+				type1.equals(DOUBLE_ID) && type2.equals(INT_ID))) {
 			throw new InvalidTypeException(UNMATCHING_TYPE_MSG + msgSuffix);
 		}
 	}

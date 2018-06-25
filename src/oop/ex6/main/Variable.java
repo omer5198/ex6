@@ -30,7 +30,7 @@ public class Variable {
     public Variable(String type, String name, int initializationLine, boolean isGlobal, boolean isFinal) {
         this.type = type;
         this.name = name;
-        this.initializationLine = UNINITIALIZED;
+        this.initializationLine = initializationLine;
         this.isGlobal = isGlobal;
         this.isFinal = isFinal;
     }
@@ -40,7 +40,7 @@ public class Variable {
      * @return whether is initialized or not
      */
     public boolean isInitialized() {
-        return UNINITIALIZED != -1;
+        return this.initializationLine != -1;
     }
 
     /**
@@ -78,5 +78,13 @@ public class Variable {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * Sets a variable initialization line
+	 * @param initializationLine new initialization line to set to
+	 */
+	public void setInitializationLine(int initializationLine) {
+		this.initializationLine = initializationLine;
 	}
 }

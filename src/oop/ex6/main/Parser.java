@@ -11,25 +11,26 @@ public class Parser {
 
     private static final String VALID_VARIABLE_NAME_REGEX = "(?:_[A-Za-z_\\d]+|[A-Za-z]+[A-Za-z_\\d]*)";
 
-    private static final String VALID_METHOD_NAME_REGEX = "[a-zA-Z]+[a-zA-Z\\d_]*";
-
     public static String CHECK_TYPES_REGEX = "(?:String|double|int|boolean|char)";
 
-    private static final String METHOD_PARAMETER_REGEX = "\\s*" + CHECK_TYPES_REGEX + "\\s+" +
-			VALID_VARIABLE_NAME_REGEX;
-
     private static final String VARIABLE_DECLARING_REGEX = "\\s*(?:(final)\\s+)?(" + CHECK_TYPES_REGEX +
-			")\\s+(?:\\s*(" + VALID_VARIABLE_NAME_REGEX + ")(?>(?:\\s*\\=\\s*[^\\s]+?)?\\s*[,;]))+(?<=;)$";
+			")\\s+(?:\\s*" + VALID_VARIABLE_NAME_REGEX + "(?>(?:\\s*\\=\\s*\\S.*?)?\\s*[,;]))+(?<=;)\\s*";
+
+    private static final String VARIABLE_ASSIGN_REGEX = "(?:_[A-Za-z_\\d]+|[A-Za-z]+" +
+			"[A-Za-z_\\d]*)(?:\\s*\\=\\s*\\S.*?);$";
+
+    private static final Pattern VARIABLE_ASSIGN_PATTERN = Pattern.compile(VARIABLE_ASSIGN_REGEX);
 
     static final Pattern VARIABLE_DECLARING_PATTERN = Pattern.compile(VARIABLE_DECLARING_REGEX);
 
-    private static final String IF_OR_WHILE_REGEX = "\\s*(?:if|while)\\s*\\((?:\\s*[a-zA-Z]+[a-zA-Z0-9_]*|_+ " +
-            "[a-zA-Z0-9_]+|\\s*(?:\\d+|\\d+\\.\\d+))\\s*(?:(?:\\|\\||&&)\\s*(?:[a-zA-Z]+[a-zA-Z0-9_]*|" +
-            "_+[a-zA-Z0-9_]+|\\s*(?:\\d+|\\d+\\.\\d+))\\s*)*\\)\\s*\\{\\s*";
+    private static final String IF_OR_WHILE_REGEX = "\\s*(?:if|while)\\s*\\((?:\\s*[a-zA-Z]+[a-zA-Z0-9_]*" +
+			"|_+\\s*[a-zA-Z0-9_]+|\\s*(?:-?\\s*\\d+|-?\\s*\\d+\\.\\d+))\\s*(?:(?:\\|\\||&&)\\s*" +
+			"(?:[a-zA-Z]+[a-zA-Z0-9_]*|_+[a-zA-Z0-9_]+|\\s*" +
+			"(?:-?\\s*\\d+|-?\\s*\\d+\\.\\d+))\\s*)*\\)\\s*\\{\\s*";
 
     static final Pattern IF_OR_WHILE_PATTERN = Pattern.compile(IF_OR_WHILE_REGEX);
 
-    private static final String METHOD_DECLARING_REGEX = "\\s*void\\s+([a-zA-Z]+[a-zA-Z\\d_]*)\\s*\\((?:\\s*" +
+    private static final String METHOD_DECLARING_REGEX = "\\s*void\\s+([a-zA-Z]+[a-zA-Z\\d_]*)\\s*\\(\\s*(?:" +
 			"(?:final\\s+)?\\s*(?:(?:String|double|int|boolean|char)\\s+(?:_[A-Za-z_\\d]+|[A-Za-z]+" +
 			"[A-Za-z_\\d]*)\\s*,))*(?:\\s*(?:final\\s+)?\\s*(?:(?:String|double|int|boolean|char)\\s+(" +
 			"?:_[A-Za-z_\\d]+|[A-Za-z]+[A-Za-z_\\d]*)\\s*))?\\)\\s*\\{\\s*";
@@ -43,6 +44,10 @@ public class Parser {
 
     private static final Pattern METHOD_CALL_PATTERN = Pattern.compile(METHOD_CALL_REGEX);
 
+    static final String CLOSING_BLOCK_REGEX = "\\s*}\\s*";
+
+	static final Pattern CLOSING_BLOCK_PATTERN = Pattern.compile(CLOSING_BLOCK_REGEX);
+
     private static final String RETURN_REGEX = "\\s*return\\s*;\\s*";
 
     private static final Pattern RETURN_PATTERN = Pattern.compile(RETURN_REGEX);
@@ -54,9 +59,10 @@ public class Parser {
     private static final String MISSING_RETURN_ERROR_SUFFIX = " (Missing return statement at " +
 			"the end of the method)";
 
+	final static private String ALREADY_EXIST_MSG = "Tried to create a variable which already exists";
+
     public static HashMap<String, Method> parseGlobalBlock(Block block) throws VariableException, InvalidLineException {
 		HashMap<String, Method> methodsMap = new HashMap<>();
-		String msgSuffix;
         for(Tuple<String, Integer> line : block.getCodeLines()) {
 			if(matchMethod(line, block, methodsMap)) {
 				continue;
@@ -72,7 +78,7 @@ public class Parser {
 
     public static void parseBlock(Block block, HashMap<String, Method> methodHashMap)
 			throws VariableException, InvalidConditionException, InvalidMethodException,
-			ParameterException, MethodCallInOuterScopeException {
+			ParameterException, MethodCallInOuterScopeException, InvalidLineException {
     	boolean isMethod = block.isMethod();
     	ArrayList<Tuple<String, Integer>> lines = block.getCodeLines();
 		Tuple<String, Integer> firstLine = lines.get(0);
@@ -104,6 +110,11 @@ public class Parser {
 			if(matchReturn(line)) {
     			continue;
 			}
+			if(matchClosing(line)) {
+    			continue;
+			}
+			throw new InvalidLineException(INVALID_LINE_ERROR +
+					" | Line " + String.valueOf(line.getSecond()));
 		}
 		if(isMethod) {
 			lines.add(0, firstLine);
@@ -117,7 +128,8 @@ public class Parser {
 
 	private static boolean matchMethodCall(Tuple<String, Integer> line, Block block,
 										   HashMap<String, Method> methodHashMap)
-			throws InvalidMethodException, ParameterException, MethodCallInOuterScopeException {
+			throws InvalidMethodException, ParameterException, MethodCallInOuterScopeException,
+			VariableException {
     	Matcher methodCallMatcher = METHOD_CALL_PATTERN.matcher(line.getFirst());
     	if(methodCallMatcher.matches()) {
     		String methodName = methodCallMatcher.group(1);
@@ -128,7 +140,7 @@ public class Parser {
 	}
 
 	private static boolean matchCondition(Tuple<String, Integer> line, Block block)
-			throws InvalidConditionException {
+			throws InvalidConditionException, VariableException {
 		Matcher conditionMatcher = IF_OR_WHILE_PATTERN.matcher(line.getFirst());
 		if(conditionMatcher.matches()) {
 			ConditionValidator.validateCondition(line, block);
@@ -137,11 +149,15 @@ public class Parser {
 		return false;
 	}
 
-	private static void getParameters(Tuple<String, Integer> line, Block block) {
+	private static void getParameters(Tuple<String, Integer> line, Block block) throws VariableException {
 		Matcher methodMatcher = METHOD_DECLARING_PATTERN.matcher(line.getFirst());
 		if(methodMatcher.matches()) {
 			ArrayList<Variable> parameters = MethodParser.parseMethodVariables(line);
 			for(Variable param : parameters) {
+				if(block.getLocalVariable(param.getName()) != null) {
+					// in case the variable already exists in this scope
+					throw new VariableException(ALREADY_EXIST_MSG + " | Line " + line.getSecond());
+				}
 				block.addVariable(param);
 			}
 		}
@@ -162,16 +178,39 @@ public class Parser {
 
 	private static boolean matchVariables(Tuple<String, Integer> line, Block block)
 			throws VariableException {
-		Matcher variableMatcher = VARIABLE_DECLARING_PATTERN.matcher(line.getFirst());
-		if(variableMatcher.matches()) {
-			boolean isFinal = variableMatcher.group(1) != null;
-			String type = variableMatcher.group(2);
+		Matcher variableDeclareMatcher = VARIABLE_DECLARING_PATTERN.matcher(line.getFirst());
+		if(variableDeclareMatcher.matches()) {
+			boolean isFinal = variableDeclareMatcher.group(1) != null;
+			String type = variableDeclareMatcher.group(2);
 			ArrayList<Variable> variables = VariableValidator.getVariables(line, block, type, isFinal);
 			for(Variable var : variables) {
+				if(block.getLocalVariable(var.getName()) != null) {
+					// in case the variable already exists in this scope
+					throw new VariableException(ALREADY_EXIST_MSG + " | Line " + line.getSecond());
+				}
 				block.addVariable(var);
 			}
 			return true;
 		}
+		Matcher variableAssignMatcher = VARIABLE_ASSIGN_PATTERN.matcher(line.getFirst());
+		if(variableAssignMatcher.matches()) {
+			ArrayList<Variable> variables = VariableValidator.getVariables(line, block, null, false);
+			if(variables != null) {
+				for(Variable var : variables) {
+					if(block.getLocalVariable(var.getName()) != null) {
+						// in case the variable already exists in this scope
+						throw new VariableException(ALREADY_EXIST_MSG + " | Line " + line.getSecond());
+					}
+					block.addVariable(var);
+				}
+			}
+			return true;
+		}
 		return false;
+	}
+
+	private static boolean matchClosing(Tuple<String, Integer> line) {
+    	Matcher closingMatcher = CLOSING_BLOCK_PATTERN.matcher(line.getFirst());
+    	return closingMatcher.matches();
 	}
 }

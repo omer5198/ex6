@@ -6,12 +6,7 @@ import java.util.regex.Pattern;
 
 public class ConditionValidator {
 
-    private static final String VALID_VARIABLE_NAME_REGEX = "(?:[a-zA-Z]+[a-zA-Z0-9_]*|_+[a-zA-Z0-9_]+)";
-
-    private static final Pattern VALID_VARIABLE_NAME_PATTERN = Pattern.compile(VALID_VARIABLE_NAME_REGEX);
-
-//    private static final String BOOLEAN_REGEX = "\\s*(?:true|false|" + INT_REGEX + "|" +
-//            DOUBLE_REGEX + ")" ;
+	final static private String INVALID_CONDITION_ERROR = "Invalid condition";
 
     private static class ConditionParser {
 
@@ -31,14 +26,23 @@ public class ConditionValidator {
     }
 
     public static void validateCondition(Tuple<String, Integer> lineTuple, Block block) throws
-            InvalidConditionException{
+            InvalidConditionException, VariableException{
 
         ArrayList<String> conditions = ConditionParser.parseParameters(lineTuple.getFirst());
         String expectedType = VariableValidator.getType("true");
+        int lineNumber = lineTuple.getSecond();
+		String msgSuffix = " | Line " + String.valueOf(lineNumber);
         for(String condition: conditions){
             String type;
             Variable variableForCondition = block.getVariable(condition);
             if (variableForCondition != null){
+            	if(!variableForCondition.isInitialized()) {
+            		throw new UninitializedException(VariableValidator.UNINITIALIZED_VAR_MSG + msgSuffix);
+				}
+				if(lineNumber < variableForCondition.getLine() && !variableForCondition.isGlobal()) {
+					// in case of trying to reach a variable that wasn't defined yet
+					throw new VariableException(VariableValidator.INVALID_VAR_MSG + msgSuffix);
+				}
                 type = variableForCondition.getType();
             }
             else{
@@ -49,15 +53,10 @@ public class ConditionValidator {
                         "");
             }
             catch(VariableException e) {
-                throw new InvalidConditionException("Invalid condition in line "+ lineTuple.getSecond());
+                throw new InvalidConditionException(INVALID_CONDITION_ERROR + msgSuffix);
 
             }
         }
-    }
-
-    private static boolean matchSpecificPattern(String text, Pattern pattern){
-        Matcher m = pattern.matcher(text);
-        return m.matches();
     }
 
 }
