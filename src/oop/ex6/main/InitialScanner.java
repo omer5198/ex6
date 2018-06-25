@@ -20,6 +20,23 @@ public class InitialScanner {
 
     private int lineNumber;
 
+    private static final String COMMENT_PREFIX = "//";
+
+    private static final String INVALID_BRACKETS_ERROR = "Invalid brackets closing";
+
+    private static final String INVALID_BRACKETS_STRUCT_ERROR = "Invalid brackets structure";
+
+    private static final String METHOD_DECLARED_IN_INNER_SCOPE_ERROR =
+			"Method declared not in outer scope";
+
+    private static final String CLOSING_BLOCK_REGEX = "\\s*}\\s*";
+
+    private static final Pattern CLOSING_BLOCK_PATTERN = Pattern.compile(CLOSING_BLOCK_REGEX);
+
+	private static final String EMPTY_LINE_REGEX = "\\s*";
+
+	private static final Pattern EMPTY_LINE_PATTERN = Pattern.compile(EMPTY_LINE_REGEX);
+
     private HashMap<String, Variable> globalVariables; // we need this so that after foing initial scanning
     // we would have access to the global variables since the global scope is not a block (and method returns
     // list of blocks
@@ -35,7 +52,6 @@ public class InitialScanner {
         lineNumber = 0;
     }
 
-
     /**
      * The main method of the class. It reads the lines given in the constructor and returns a list of all
      * blocks of the file
@@ -44,102 +60,84 @@ public class InitialScanner {
      * @throws MethodInInnerScopeException When a method is defined not int the outer scope
      * @throws MethodCallInOuterScopeException When a method is called not inside a method declaration.
      */
-    public Tuple<Block, ArrayList<Block>> InitialParse() throws InvalidBracketsException, MethodInInnerScopeException,
-            MethodCallInOuterScopeException{
+    public Tuple<Block, ArrayList<Block>> initialParse() throws InvalidBracketsException,
+			MethodInInnerScopeException {
         HashMap<String, Variable> globalVariables = new HashMap<String, Variable>();
         String currLine;
-        Block currBlock = new Block(new HashMap<>(), null, new ArrayList<>(), false);
+        Block currBlock = new Block(null, false);
         Block globalBlock = currBlock;
         Block temp = null;
         boolean addAtEnd = true;
         ArrayList<Block> blocksList = new ArrayList<>();
         while (lineNumber < linesToScan.size()) {
             currLine = linesToScan.get(lineNumber); // check here to allow while check condition
+			String msgSuffix = " | Line " + String.valueOf(lineNumber);
             if (!(isLineEmpty(currLine) || isLineComment(currLine))) {
-                if (isLineClosingBlock(currLine)){
-                    unclosedBlocks --;
-                    if(unclosedBlocks < 0){
-                        throw new InvalidBracketsException("invalid brackets closing");
-                    }
-                    currBlock.addLine(new Tuple<>(currLine, lineNumber));
-                    blocksList.add(currBlock);
-                    currBlock = currBlock.getParent(); // curBlock is null iff it is in the outer scope, there
-                    // can be no closing of a block in the outer scope
-                    addAtEnd = false;
-                }
-                else if (isLineOpeningBlock(currLine)) {
-                    unclosedBlocks++;
-                    globalBlock.addLine(new Tuple<>(currLine, lineNumber));
-                    addAtEnd = true;
-                    // block opening
-                    if(isLineIfOrWhile(currLine)){
-                        temp = currBlock;
-                        currBlock = new Block(new HashMap<>(), temp, new ArrayList<>(),
-                                false);
-                    } else if (isLineMethodDeclaration(currLine)){
-                        if(currBlock.getParent() != null) {
-                            throw new MethodInInnerScopeException("method declared not in outer scope");
-                        }
-                        temp = currBlock;
-                        currBlock = new Block(new HashMap<>(), temp, new ArrayList<>(),
-                                true);
-                    }
-
-                } else if (isLineVariableDeclaration(currLine)) {
-                        currBlock.addDeclaredVariables(currLine);
-                    }
-                } else if (isLineMethodCall(currLine)){
-                    if(!isBlockInMethod(currBlock)){
-                        throw new MethodCallInOuterScopeException("method called in outer scope");
-                    }
-                }
-                if (addAtEnd) {
-                    currBlock.addLine(new Tuple<>(currLine, lineNumber));
-                } // notice that if a block was opened the
+				if (isLineClosingBlock(currLine)) {
+					unclosedBlocks--;
+					if (unclosedBlocks < 0) {
+						throw new InvalidBracketsException(INVALID_BRACKETS_ERROR + msgSuffix);
+					}
+					currBlock.addLine(new Tuple<>(currLine, lineNumber));
+					blocksList.add(currBlock);
+					currBlock = currBlock.getParent(); // curBlock is null iff it is in the outer scope, there
+					// can be no closing of a block in the outer scope
+					addAtEnd = false;
+				} else {
+					addAtEnd = true;
+					// block opening
+					if (isLineIfOrWhile(currLine)) {
+						temp = currBlock;
+						unclosedBlocks++;
+						currBlock = new Block(temp, false);
+					} else if (isLineMethodDeclaration(currLine)) {
+						globalBlock.addLine(new Tuple<>(currLine, lineNumber));
+						if (currBlock.getParent() != null) {
+							throw new MethodInInnerScopeException(
+									METHOD_DECLARED_IN_INNER_SCOPE_ERROR + msgSuffix);
+						}
+						temp = currBlock;
+						unclosedBlocks++;
+						currBlock = new Block(temp, true);
+					}
+				}
+			}
+			if (addAtEnd) {
+				currBlock.addLine(new Tuple<>(currLine, lineNumber));
+			} // notice that if a block was opened the
             // line will be saved in the new opened block. otherwise, in the current.
             lineNumber ++;
         }
         if(unclosedBlocks != 0){
-            throw new InvalidBracketsException("invalid brackets closing" + lineNumber);
+            throw new InvalidBracketsException(INVALID_BRACKETS_STRUCT_ERROR);
         }
         this.globalVariables = globalVariables;
 
         return new Tuple(globalBlock, blocksList);
     }
 
-
-
-    //TODO put in actual regexes
     private boolean isLineVariableDeclaration(String line){
-        return matchRegex(VARIABLE_DECLARATION_REGEX, line);
-    }
-
-    private boolean isLineMethodCall(String currLine) {
-        return matchRegex(METHOD_CALL_REGEX, currLine);
-    }
-
-    private boolean isLineOpeningBlock(String line){
-        return matchRegex(OPENING_BLOCK_REGEX, line);
+        return matchPattern(Parser.VARIABLE_DECLARING_PATTERN, line);
     }
 
     private boolean isLineClosingBlock(String line){
-        return matchRegex(CLOSING_BLOCK_REGEX, line);
+        return matchPattern(CLOSING_BLOCK_PATTERN, line);
     }
 
     private boolean isLineEmpty(String line){
-        return matchRegex(EMPTY_LINE_REGEX, line);
+        return matchPattern(EMPTY_LINE_PATTERN, line);
     }
 
     private boolean isLineMethodDeclaration(String line){
-        return matchRegex(METHOD_DECLARATION_REGEX, line);
+        return matchPattern(Parser.METHOD_DECLARING_PATTERN, line);
     }
 
     private boolean isLineIfOrWhile(String line){
-        return matchRegex(IF_OR_WHILE_REGEX, line);
+        return matchPattern(Parser.IF_OR_WHILE_PATTERN, line);
     }
 
     private boolean isLineComment(String line) {
-        return matchRegex(COMMENT_REGEX, line);
+        return line.startsWith(COMMENT_PREFIX);
     }
 
     //TODO implement
@@ -149,12 +147,11 @@ public class InitialScanner {
 
     /**
      * This methods receives a line as a string and returns if the line matches a certain regex.
-     * @param regex The given regex we wish to match the line to
      * @param line The line we are matching
-     * @return true iff the line matches the given regex.
+	 * @param pattern the pattern to match the line with
+     * @return true iff the line matches the given pattern
      */
-    private boolean matchRegex(String regex, String line){
-        Pattern pattern = Pattern.compile(regex);
+    private boolean matchPattern(Pattern pattern, String line){
         Matcher m = pattern.matcher(line);
         return m.matches();
     }

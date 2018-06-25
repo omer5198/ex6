@@ -18,11 +18,11 @@ public class Reader {
 
     /**
      * The constructor of the reader.
-     * @param file the file that the reader is supposed to read
+     * @param filePath the file path that the reader is supposed to read
      * @throws FileNotFoundException Thrown when file is not found
      */
-    public Reader(File file) throws FileNotFoundException{
-        this.file = file;
+    public Reader(String filePath) throws FileNotFoundException{
+        this.file = new File(filePath);
         try {
             this.br = new BufferedReader(new FileReader(file));
         }

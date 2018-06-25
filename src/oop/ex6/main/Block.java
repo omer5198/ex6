@@ -20,16 +20,13 @@ public class Block {
     /**
      * The constructor of the block. It receives a hashmap of the variables in it's scope (and in outer
      * scopes)
-     * @param blockVariables The hashmap of variables
      * @param parent the parent block of the current block
 	 * @param isMethod whether the block is method or not
      */
-    Block(HashMap<String, Variable> blockVariables, Block parent,
-		  ArrayList<Tuple<String, Integer>> codeLines,
-		  Boolean isMethod){
-        this.blockVariables = blockVariables;
+    Block(Block parent, Boolean isMethod){
+        this.blockVariables = new HashMap<String, Variable>();
         this.parent = parent;
-        this.codeLines = codeLines;
+		this.codeLines = new ArrayList<Tuple<String, Integer>>();
         this.isMethod = isMethod;
     }
 
@@ -40,6 +37,14 @@ public class Block {
     public HashMap<String, Variable> getVariablesInBlock() {
         return blockVariables;
     }
+
+	/**
+	 * Adds a variable to the blockVariables
+	 * @param var the variable to add
+	 */
+	public void addVariable(Variable var) {
+    	blockVariables.put(var.getName(), var);
+	}
 
     /**
      * getter for the code lines

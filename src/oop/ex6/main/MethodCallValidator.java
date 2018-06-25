@@ -13,6 +13,8 @@ public class MethodCallValidator {
 
 	private static final String INVALID_METHOD_NAME = "Invalid method name provided";
 
+	private static final String METHOD_IN_OUTER_SCOPE_ERROR = "Method called not inside a method";
+
 	private static class MethodCallParser {
 
 		final static private String PARAMETERS_SPLIT_REGEX =
@@ -30,12 +32,15 @@ public class MethodCallValidator {
 		}
 	}
 
-	public void valdiateMethodCall(Tuple<String, Integer> line, String methodName, Block block,
+	public static void valdiateMethodCall(Tuple<String, Integer> line, String methodName, Block block,
 								   HashMap<String, Method> methodHashMap)
-			throws ParameterException, InvalidMethodException {
+			throws ParameterException, InvalidMethodException, MethodCallInOuterScopeException {
 		String text = line.getFirst();
 		int lineNumber = line.getSecond();
 		String msgSuffix = " | Line " + String.valueOf(lineNumber);
+		if(!isBlockInMethod(block)) {
+			throw new MethodCallInOuterScopeException(METHOD_IN_OUTER_SCOPE_ERROR + msgSuffix);
+		}
 		Method method = getMethod(methodName, methodHashMap);
 		if(method == null) {
 			throw new InvalidMethodException(INVALID_METHOD_NAME + msgSuffix);
@@ -67,5 +72,22 @@ public class MethodCallValidator {
 
 	private static Method getMethod(String methodName, HashMap<String, Method> methodHashMap) {
 		return methodHashMap.get(methodName);
+	}
+
+	/**
+	 * This method checks if a certain block is in a scope of a method declaration, this helps us determine
+	 * if a method call is legal or not.
+	 * @param startingBlock The block we check
+	 * @return true iff the block is somewhere in a method defining block
+	 */
+	private static boolean isBlockInMethod(Block startingBlock){
+		Block currBlock = startingBlock;
+		while(currBlock.getParent() != null){
+			if (currBlock.isMethod()){
+				return true;
+			}
+			currBlock = currBlock.getParent();
+		}
+		return false;
 	}
 }

@@ -20,7 +20,7 @@ public class VariableValidator {
 
 	final static private String STRING_REGEX = "\".*\"";
 
-	final static private String CHAR_REGEX = "\'.\'";
+	final static private String CHAR_REGEX = "\'.?\'";
 
 	final static private String DOUBLE_REGEX = "\\d+(?:\\.\\d+)?";
 
@@ -68,11 +68,6 @@ public class VariableValidator {
 			}
 			return variables;
 		}
-	}
-
-	public static ArrayList<Variable> getVariables(Tuple<String, Integer> line, Block block, boolean isFinal)
-			throws VariableException {
-		return getVariables(line, block, null, isFinal);
 	}
 
 	public static ArrayList<Variable> getVariables(Tuple<String, Integer> line, Block block, String type,
