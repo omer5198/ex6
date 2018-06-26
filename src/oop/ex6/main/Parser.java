@@ -54,6 +54,8 @@ public class Parser {
 
     private static final String INVALID_LINE_ERROR = "Invalid line provided";
 
+    private static final String METHOD_ALREADY_EXISTS_ERROR = "More than one method with the same name found.";
+
     private static final String INVALID_METHOD_STRUCTURE_ERROR = "Invalid method structure";
 
     private static final String MISSING_RETURN_ERROR_SUFFIX = " (Missing return statement at " +
@@ -61,7 +63,8 @@ public class Parser {
 
 	final static private String ALREADY_EXIST_MSG = "Tried to create a variable which already exists";
 
-    public static HashMap<String, Method> parseGlobalBlock(Block block) throws VariableException, InvalidLineException {
+    public static HashMap<String, Method> parseGlobalBlock(Block block) throws VariableException,
+			InvalidLineException, InvalidMethodException {
 		HashMap<String, Method> methodsMap = new HashMap<>();
         for(Tuple<String, Integer> line : block.getCodeLines()) {
 			if(matchMethod(line, block, methodsMap)) {
@@ -165,11 +168,14 @@ public class Parser {
 
 
 	private static boolean matchMethod(Tuple<String, Integer> line, Block block,
-									   HashMap<String, Method> methodsMap) {
+									   HashMap<String, Method> methodsMap) throws InvalidMethodException {
 		Matcher methodMatcher = METHOD_DECLARING_PATTERN.matcher(line.getFirst());
 		if(methodMatcher.matches()) {
 			String methodName = methodMatcher.group(1);
 			Method method = MethodParser.getMethod(line, methodName);
+			if(methodsMap.get(methodName) != null) {
+				throw new InvalidMethodException(METHOD_ALREADY_EXISTS_ERROR + " | Line " + line.getSecond());
+			}
 			methodsMap.put(methodName, method);
 			return true;
 		}
