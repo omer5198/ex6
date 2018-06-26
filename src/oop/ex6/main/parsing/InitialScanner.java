@@ -28,20 +28,27 @@ public class InitialScanner {
 
     private int lineNumber;
 
+    // The prefix of a comment in javas
     public static final String COMMENT_PREFIX = "//";
 
+    // The message of the invalid brackets error in the middle of the code
     public static final String INVALID_BRACKETS_ERROR = "Invalid brackets closing";
 
+    // The message of the invalid brackets error in the end
     public static final String INVALID_BRACKETS_STRUCT_ERROR = "Invalid brackets structure";
 
+    // The message of the method declared in inner scope exception
     public static final String METHOD_DECLARED_IN_INNER_SCOPE_ERROR =
 			"Method declared not in outer scope";
 
 
+    // regex of an empty line
 	public static final String EMPTY_LINE_REGEX = "\\s*";
 
+	// pattern for empty line regex
 	public static final Pattern EMPTY_LINE_PATTERN = Pattern.compile(EMPTY_LINE_REGEX);
 
+	// error message for condition defined in outer scope
 	public static final String CONDITION_IN_OUTER_SCOPE_ERROR = "If / While found in global scope";
 
     private HashMap<String, Variable> globalVariables; // we need this so that after foing initial scanning
@@ -60,8 +67,10 @@ public class InitialScanner {
     }
 
     /**
-     * The main method of the class. It reads the lines given in the constructor and returns a list of all
-     * blocks of the file
+     * The main method of the class. It reads the lines given in the constructor and returns a tuple
+     * containing the global block in its final state (containing all methods and all global variables),
+     * plus a list of all the inner blocks (scopes) of the code file. It handles basic exceptions such
+     * as a method not defined in the outer scope or a condition defined in the outer scope.
      * @return A list of the blocks of the file. the global scope block is the last block in the list.
      * @throws InvalidBracketsException When the bracket opening and closing is invalid
      * @throws MethodInInnerScopeException When a method is defined not int the outer scope
@@ -73,7 +82,8 @@ public class InitialScanner {
         Block currBlock = new Block(null, false);
         Block globalBlock = currBlock;
         Block temp = null;
-        boolean addAtEnd = true;
+        boolean addAtEnd = true; // sometimes we want to add the line immediately and sometimes to the next
+        // block
         ArrayList<Block> blocksList = new ArrayList<>();
         while (lineNumber < linesToScan.size()) {
             currLine = linesToScan.get(lineNumber); // check here to allow while check condition
@@ -176,9 +186,5 @@ public class InitialScanner {
         }
         return false;
 
-    }
-
-    public HashMap<String, Variable> getGlobalVariables() {
-        return globalVariables;
     }
 }

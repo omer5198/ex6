@@ -14,6 +14,12 @@ public class MethodParser {
 
 	final static private Pattern PARAMETER_SPLIT_PATTERN = Pattern.compile(PARAMETER_SPLIT_REGEX);
 
+	/**
+	 * This parses a method declaration line and returns a list of all variables that the method receives
+	 * as input.
+	 * @param line the line that we are parsing (a tuple of text and line number)
+	 * @return the arraylist of variables, holding only the type and the name of the variable
+	 */
 	public static ArrayList<Variable> parseMethodVariables(Tuple<String, Integer> line) {
 		ArrayList<Variable> variables = new ArrayList<>();
 		String text = line.getFirst();
@@ -28,6 +34,13 @@ public class MethodParser {
 		return variables;
 	}
 
+	/**
+	 * This method returns a method object, out of the name of the method and the line in which it is
+	 * declared
+	 * @param line the line in which the method is declared
+	 * @param methodName the name of the method
+	 * @return A new appropriate method object with the relevant name and input parameters
+	 */
 	public static Method getMethod(Tuple<String, Integer> line, String methodName) {
 		ArrayList<String> parameters = new ArrayList<>();
 		String text = line.getFirst();

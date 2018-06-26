@@ -1,5 +1,11 @@
 package oop.ex6.validators;
 
+/*
+ * This class validates a condition line in the code. i.e validates an if\while statement within the code
+ * (under the assumption that the line as a whole is valid)
+ */
+
+
 import oop.ex6.exceptions.condition.InvalidConditionException;
 import oop.ex6.exceptions.variable.UninitializedException;
 import oop.ex6.exceptions.variable.VariableException;
@@ -17,11 +23,18 @@ public class ConditionValidator {
 
     private static class ConditionParser {
 
+        // a regex that groups the parameters of an if\while statement
         public static final String CONDITION_GROUPING_REGEX = "\\s*(?:(?:if|while)\\s*\\(|\\|\\||\\&\\&" +
                 ")?\\s*(.+?)\\s*(?:\\)|\\|\\||\\&\\&)+";
 
+        // the pattern of the above regex
         public static final Pattern CONDITION_GROUPING_PATTERN = Pattern.compile(CONDITION_GROUPING_REGEX);
 
+        /**
+         * This method returns all the parameters inside an if\while statement given a line of such.
+         * @param line The text of the if\while statement line.
+         * @return A list with the parameter names in the condition statement.
+         */
         public static ArrayList<String> parseParameters(String line) {
             ArrayList<String> params = new ArrayList<>();
             Matcher matcher = CONDITION_GROUPING_PATTERN.matcher(line);
@@ -32,6 +45,15 @@ public class ConditionValidator {
         }
     }
 
+    /**
+     * This method receives a line as a tuple (also containing the number of line in the code) in which
+     * there is an if\while statement. It returns true iff the line is valid in the code according to the
+     * javas specifications.
+     * @param lineTuple The line tuple received
+     * @param block The block in which the line is written
+     * @throws InvalidConditionException when condition is invalid.
+     * @throws VariableException if there are variables used which cause an error.
+     */
     public static void validateCondition(Tuple<String, Integer> lineTuple, Block block) throws
             InvalidConditionException, VariableException {
 

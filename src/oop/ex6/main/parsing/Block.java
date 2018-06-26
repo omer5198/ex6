@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * This class represents a block that a parser receives. This helps us deal with scopes of variables for
- * example when parsing through our file.
+ * This class represents a block (scope) that a parser receives. This helps us deal with scopes of variables,
+ * for example when parsing through our file. Using this we can easily deal with local variables, etc.
  */
 public class Block {
 
@@ -57,19 +57,37 @@ public class Block {
         return codeLines;
     }
 
-    public void addLine(Tuple<String, Integer> line){
+	/**
+	 * Adds a line to the list of lines in the block.
+	 * @param line A tuple containing the text of the line and the number of the line in the code file.
+	 */
+	public void addLine(Tuple<String, Integer> line){
         codeLines.add(line);
     }
 
 
-    public Block getParent() {
+	/**
+	 * A getter for the parent block of the block
+	 * @return the parent of the block
+	 */
+	public Block getParent() {
         return parent;
     }
 
+	/**
+	 * Returns whether the block is a method defining block or not
+	 * @return the isMethod indicator
+	 */
 	public boolean isMethod() {
     	return isMethod;
 	}
 
+	/**
+	 * returns a variable object of a given name. If not in the current block, it will go up to outer blocks
+	 * (parents) and check if it is there.
+	 * @param name The name of the variable we search for, i.e check if it is defined somewhere in the block
+	 * @return the variable object with the given name if it is defined in the block, null otherwise.
+	 */
 	public Variable getVariable(String name) {
     	Block current = this;
     	Variable variable = null;
@@ -81,6 +99,11 @@ public class Block {
 		return variable;
 	}
 
+	/**
+	 * This method checks if there is a variable of a given name inside this specific block (local variable).
+	 * @param name The given name of the variable
+	 * @return Either the variable object with the given name, null if there is no such variable in the block.
+	 */
 	public Variable getLocalVariable(String name) {
     	return blockVariables.get(name);
 	}

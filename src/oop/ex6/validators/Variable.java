@@ -7,6 +7,7 @@ package oop.ex6.validators;
 
 public class Variable {
 
+    // This means the variable was not assigned
     public static int UNINITIALIZED = -1;
 
     private String type;

@@ -1,5 +1,9 @@
 package oop.ex6.validators;
 
+/**
+ * This class validates lines involving variables, such as declaring and assigning variables.
+ */
+
 import oop.ex6.exceptions.variable.*;
 import oop.ex6.main.parsing.Block;
 import oop.ex6.tools.Tuple;
@@ -66,6 +70,12 @@ public class VariableValidator {
 
 		final static private Pattern VAR_SPLIT_PATTERN = Pattern.compile(VAR_SPLIT_REGEX);
 
+		/**
+		 * This method receives a line with method declaration and seperates them to return an arraylist
+		 * of tuples (with the name and value of the variable).
+		 * @param line The line we wish to parse.
+		 * @return A list of tuples of the variables names and values.
+		 */
 		public static ArrayList<Tuple<String, String>> parseVariable(String line) {
 			ArrayList<Tuple<String, String>> variables = new ArrayList<>();
 			Matcher matcher = VAR_SPLIT_PATTERN.matcher(line);
@@ -78,6 +88,17 @@ public class VariableValidator {
 		}
 	}
 
+	/**
+	 * This method receives the list of variable names and values, returns a list of variables if they are
+	 * valid and throws exceptions when encountering them.
+	 * @param line The line that we check for validity of the line
+	 * @param block The block in which the line exists
+	 * @param type The type of the variable declared (null if it is an assignment)
+	 * @param isFinal whether the variables declaring is final or not
+	 * @return an arraylist of all variable object defined in the line (which is either a declaration or
+	 * assignment)
+	 * @throws VariableException upon encountering any exception (invalidity) of variables in the line
+	 */
 	public static ArrayList<Variable> getVariables(Tuple<String, Integer> line, Block block, String type,
 												   boolean isFinal)
 			throws VariableException {
