@@ -1,8 +1,6 @@
 package oop.ex6.main;
 
 import oop.ex6.exceptions.condition.ConditionException;
-import oop.ex6.exceptions.condition.ConditionInOuterScopeError;
-import oop.ex6.exceptions.condition.InvalidConditionException;
 import oop.ex6.exceptions.method.MethodException;
 import oop.ex6.exceptions.parsing.InvalidBracketsException;
 import oop.ex6.exceptions.parsing.InvalidLineException;
@@ -19,9 +17,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Receives an s-Java file and validates it
+ */
 public class Sjavac {
 
-	private static void validateFile(String filePath) throws FileNotFoundException, IOException,
+	private static final int VALID = 0;
+
+	private static final int INVALID = 1;
+
+	private static final int IO_EXCEPTION = 2;
+
+	private static final String INVALID_ARGS_ERROR = "Invalid number of arguments provided";
+
+	private static void validateFile(String filePath) throws IOException,
 			InvalidBracketsException, VariableException, InvalidLineException,
 			ConditionException, MethodException {
 		Reader fileReader = new Reader(filePath);
@@ -35,24 +44,22 @@ public class Sjavac {
 	}
 
 	public static void main(String[] args) {
+		if(args.length != 1) {
+			System.out.println(IO_EXCEPTION);
+			System.err.println(INVALID_ARGS_ERROR);
+			return;
+		}
 		String filePath = args[0];
 		try{
 			validateFile(filePath);
-			System.out.println(0);
+			System.out.println(VALID);
 		} catch (IOException e) {
-			System.out.println(2);
-		} catch (Exception e) {
-			System.out.println(1);
+			System.out.println(IO_EXCEPTION);
+			System.err.println(e.getMessage());
+		} catch (VariableException | MethodException | ConditionException |
+				InvalidLineException | InvalidBracketsException e) {
+			System.out.println(INVALID);
+			System.err.println(e.getMessage());
 		}
-
-//		} catch (InvalidMethodException e){
-//			System.out.println(1 + e.getMessage());
-//		} catch (InvalidBracketsException e){
-//			System.out.println(1 + e.getMessage());
-//		} catch (VariableException e){
-//			System.out.println(1 + e.getMessage());
-//		} catch (InvalidConditionException){
 	}
-
-
 }

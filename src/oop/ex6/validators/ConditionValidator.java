@@ -21,21 +21,23 @@ public class ConditionValidator {
 
 	final static private String INVALID_CONDITION_ERROR = "Invalid condition";
 
+	final static private String VAR_NOT_EXIST_ERROR = "Tried to use an uninitialized variable in a condition";
+
     private static class ConditionParser {
 
         // a regex that groups the parameters of an if\while statement
-        public static final String CONDITION_GROUPING_REGEX = "\\s*(?:(?:if|while)\\s*\\(|\\|\\||\\&\\&" +
-                ")?\\s*(.+?)\\s*(?:\\)|\\|\\||\\&\\&)+";
+		private static final String CONDITION_GROUPING_REGEX = "\\s*(?:(?:if|while)\\s*\\(|\\|\\||&&" +
+                ")?\\s*(.+?)\\s*(?:\\)|\\|\\||&&)+";
 
         // the pattern of the above regex
-        public static final Pattern CONDITION_GROUPING_PATTERN = Pattern.compile(CONDITION_GROUPING_REGEX);
+		private static final Pattern CONDITION_GROUPING_PATTERN = Pattern.compile(CONDITION_GROUPING_REGEX);
 
         /**
          * This method returns all the parameters inside an if\while statement given a line of such.
          * @param line The text of the if\while statement line.
          * @return A list with the parameter names in the condition statement.
          */
-        public static ArrayList<String> parseParameters(String line) {
+        static ArrayList<String> parseParameters(String line) {
             ArrayList<String> params = new ArrayList<>();
             Matcher matcher = CONDITION_GROUPING_PATTERN.matcher(line);
             while (matcher.find()) {
@@ -76,14 +78,18 @@ public class ConditionValidator {
             }
             else{
                 type = VariableValidator.getType(condition);
+                if(type == null) {
+                	throw new InvalidConditionException(VAR_NOT_EXIST_ERROR + msgSuffix);
+				}
             }
             try {
-                VariableValidator.compareTypes(expectedType, type,
-                        "");
+            	if(expectedType == null) {
+					throw new InvalidConditionException(INVALID_CONDITION_ERROR + msgSuffix);
+				}
+                VariableValidator.compareTypes(expectedType, type, "");
             }
             catch(VariableException e) {
                 throw new InvalidConditionException(INVALID_CONDITION_ERROR + msgSuffix);
-
             }
         }
     }
