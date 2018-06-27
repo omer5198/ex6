@@ -1,12 +1,11 @@
 package oop.ex6.validators;
 
+import java.util.ArrayList;
+
 /**
  * This class represents a method in the javas file. It helps us checking for validity of a method call,
  * for example.
  */
-
-import java.util.ArrayList;
-
 public class Method {
 
     private ArrayList<String> parameterTypes; // arraylist and order matters
@@ -27,4 +26,11 @@ public class Method {
         return parameterTypes;
     }
 
+	/**
+	 * getter for the name field
+	 * @return the name of the method
+	 */
+	public String getName() {
+		return this.name;
+	}
 }

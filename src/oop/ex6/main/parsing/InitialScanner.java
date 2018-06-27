@@ -6,10 +6,7 @@ import oop.ex6.exceptions.method.MethodException;
 import oop.ex6.exceptions.method.MethodInInnerScopeException;
 import oop.ex6.exceptions.parsing.InvalidBracketsException;
 import oop.ex6.tools.Tuple;
-import oop.ex6.validators.Variable;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,12 +70,11 @@ public class InitialScanner {
      */
     public Tuple<Block, ArrayList<Block>> initialParse() throws InvalidBracketsException,
 			MethodException, ConditionException {
-        HashMap<String, Variable> globalVariables = new HashMap<String, Variable>();
         String currLine;
         Block currBlock = new Block(null, false);
         Block globalBlock = currBlock;
-        Block temp = null;
-        boolean addAtEnd = true; // sometimes we want to add the line immediately and sometimes to the next
+        Block temp;
+        boolean addAtEnd; // sometimes we want to add the line immediately and sometimes to the next
         // block
         ArrayList<Block> blocksList = new ArrayList<>();
         while (lineNumber < linesToScan.size()) {
@@ -129,11 +125,7 @@ public class InitialScanner {
             throw new InvalidBracketsException(INVALID_BRACKETS_STRUCT_ERROR);
         }
 
-        return new Tuple(globalBlock, blocksList);
-    }
-
-    private boolean isLineVariableDeclaration(String line){
-        return matchPattern(Parser.VARIABLE_DECLARING_PATTERN, line);
+        return new Tuple<>(globalBlock, blocksList);
     }
 
     private boolean isLineClosingBlock(String line){

@@ -1,9 +1,5 @@
 package oop.ex6.validators;
 
-/**
- * This class validates lines involving variables, such as declaring and assigning variables.
- */
-
 import oop.ex6.exceptions.variable.*;
 import oop.ex6.main.parsing.Block;
 import oop.ex6.tools.Tuple;
@@ -12,6 +8,9 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class validates lines involving variables, such as declaring and assigning variables.
+ */
 public class VariableValidator {
 
 	final static private String INT_ID = "int";
@@ -82,7 +81,7 @@ public class VariableValidator {
 			while(matcher.find()) {
 				String name = matcher.group(1);
 				String value = matcher.group(2);
-				variables.add(new Tuple(name, value));
+				variables.add(new Tuple<>(name, value));
 			}
 			return variables;
 		}
@@ -148,7 +147,7 @@ public class VariableValidator {
 					}
 					// in case value wasn't given (variable wasn't initialized)
 					Variable newVariable = new Variable(type, name, Variable.UNINITIALIZED,
-							block.getParent() == null, isFinal);
+							block.getParent() == null, false);
 					variables.add(newVariable);
 				}
 			} else {

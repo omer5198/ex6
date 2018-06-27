@@ -104,7 +104,7 @@ public class Parser {
 			InvalidLineException, InvalidMethodException {
 		HashMap<String, Method> methodsMap = new HashMap<>();
         for(Tuple<String, Integer> line : block.getCodeLines()) {
-			if(matchMethod(line, block, methodsMap)) {
+			if(matchMethod(line, methodsMap)) {
 				continue;
 			}
 			if(matchVariables(line, block)) {
@@ -242,12 +242,11 @@ public class Parser {
 	/**
 	 * This method matches a method declaring
 	 * @param line the line to match
-	 * @param block the block of the line
 	 * @param methodsMap the method existing
 	 * @return true iff there is a match
 	 * @throws InvalidMethodException upon invalid method
 	 */
-	private static boolean matchMethod(Tuple<String, Integer> line, Block block,
+	private static boolean matchMethod(Tuple<String, Integer> line,
 									   HashMap<String, Method> methodsMap) throws InvalidMethodException {
 		Matcher methodMatcher = METHOD_DECLARING_PATTERN.matcher(line.getFirst());
 		if(methodMatcher.matches()) {

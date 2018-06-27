@@ -1,9 +1,5 @@
 package oop.ex6.validators;
 
-/**
- * This class validates a line of a method call
- */
-
 import oop.ex6.exceptions.method.*;
 import oop.ex6.exceptions.variable.UninitializedException;
 import oop.ex6.exceptions.variable.VariableException;
@@ -15,6 +11,9 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class validates a line of a method call
+ */
 public class MethodCallValidator {
 
 	// msg for invalid number of parameters error

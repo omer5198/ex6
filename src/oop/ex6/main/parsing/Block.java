@@ -28,9 +28,9 @@ public class Block {
 	 * @param isMethod whether the block is method or not
      */
     Block(Block parent, Boolean isMethod){
-        this.blockVariables = new HashMap<String, Variable>();
+        this.blockVariables = new HashMap<>();
         this.parent = parent;
-		this.codeLines = new ArrayList<Tuple<String, Integer>>();
+		this.codeLines = new ArrayList<>();
         this.isMethod = isMethod;
     }
 
