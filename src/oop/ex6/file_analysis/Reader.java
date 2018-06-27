@@ -1,4 +1,4 @@
-package oop.ex6.file.analysis;
+package oop.ex6.file_analysis;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -48,7 +48,5 @@ public class Reader {
         }
         return listOfLines;
     }
-
-
 
 }

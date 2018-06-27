@@ -5,7 +5,7 @@ import oop.ex6.exceptions.method.MethodException;
 import oop.ex6.exceptions.parsing.InvalidBracketsException;
 import oop.ex6.exceptions.parsing.InvalidLineException;
 import oop.ex6.exceptions.variable.VariableException;
-import oop.ex6.file.analysis.Reader;
+import oop.ex6.file_analysis.Reader;
 import oop.ex6.main.parsing.Block;
 import oop.ex6.main.parsing.InitialScanner;
 import oop.ex6.main.parsing.Parser;
