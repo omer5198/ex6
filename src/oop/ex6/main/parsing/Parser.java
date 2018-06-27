@@ -23,11 +23,11 @@ public class Parser {
 
     // This is a regex matches variable decalring
     public static final String VARIABLE_DECLARING_REGEX = "\\s*(?:(final)\\s+)?(" + CHECK_TYPES_REGEX +
-			")\\s+(?:\\s*" + VALID_VARIABLE_NAME_REGEX + "(?>(?:\\s*\\=\\s*\\S.*?)?\\s*[,;]))+(?<=;)\\s*";
+			")\\s+(?:\\s*" + VALID_VARIABLE_NAME_REGEX + "(?>(?:\\s*=\\s*\\S.*?)?\\s*[,;]))+(?<=;)\\s*";
 
     // This is a regex matching a variable assigning
     public static final String VARIABLE_ASSIGN_REGEX = "(?:_[A-Za-z_\\d]+|[A-Za-z]+" +
-			"[A-Za-z_\\d]*)(?:\\s*\\=\\s*\\S.*?);$";
+			"[A-Za-z_\\d]*)(?:\\s*=\\s*\\S.*?);$";
 
     // This is a pattern for variable assigning
     public static final Pattern VARIABLE_ASSIGN_PATTERN = Pattern.compile(VARIABLE_ASSIGN_REGEX);
@@ -44,9 +44,10 @@ public class Parser {
     public static final Pattern IF_OR_WHILE_PATTERN = Pattern.compile(IF_OR_WHILE_REGEX);
 
     // This regex matches a method declaring line
-    public static final String METHOD_DECLARING_REGEX = "\\s*void\\s+([a-zA-Z]+[a-zA-Z\\d_]*)\\s*\\(\\s*(?:" +
-			"(?:final\\s+)?\\s*(?:(?:String|double|int|boolean|char)\\s+(?:_[A-Za-z_\\d]+|[A-Za-z]+" +
-			"[A-Za-z_\\d]*)\\s*,))*(?:\\s*(?:final\\s+)?\\s*(?:(?:String|double|int|boolean|char)\\s+(" +
+    public static final String METHOD_DECLARING_REGEX = "\\s*void\\s+([a-zA-Z]+[a-zA-Z\\d_]*)" +
+			"\\s*\\(\\s*(?:(?:final\\s+)?\\s*(?:(?:String|double|int|boolean|char)\\s+" +
+			"(?:_[A-Za-z_\\d]+|[A-Za-z]+[A-Za-z_\\d]*)\\s*,))*(?:\\s*(?:final\\s+)?\\s*" +
+			"(?:(?:String|double|int|boolean|char)\\s+(" +
 			"?:_[A-Za-z_\\d]+|[A-Za-z]+[A-Za-z_\\d]*)\\s*))?\\)\\s*\\{\\s*";
 
 
@@ -54,7 +55,7 @@ public class Parser {
     public static final Pattern METHOD_DECLARING_PATTERN = Pattern.compile(METHOD_DECLARING_REGEX);
 
     // This is a regex matching a method call
-    public static final String METHOD_CALL_REGEX = "\\s*([a-zA-Z]+[a-zA-Z0-9_])*\\s*\\(\\s*(?:(?:\".*?\"|" +
+    public static final String METHOD_CALL_REGEX = "\\s*([a-zA-Z]+[a-zA-Z0-9_])*\\s*\\(\\s*(?:(?:\".*?\"|"+
             "\\s*\\d+\\s*|\\s*\\d+\\.\\d+\\s*|\\s*(?:true|false)|'.??'|(?:[a-zA-Z]+[a-zA-Z0-9_]*|" +
             "_+[a-zA-Z0-9_]+))\\s*(?:\\s*,\\s*(?:\".*?\"|\\s*\\d+\\s*|\\s*\\d+\\.\\d+\\s*|\\s*" +
             "(?:true|false)|'.??'|(?:[a-zA-Z]+[a-zA-Z0-9_]*|_+[a-zA-Z0-9_]+)))*?|)\\s*\\);\\s*$";
@@ -78,7 +79,8 @@ public class Parser {
     public static final String INVALID_LINE_ERROR = "Invalid line provided";
 
     // this is a msg for a method that already exists
-    public static final String METHOD_ALREADY_EXISTS_ERROR = "More than one method with the same name found.";
+    public static final String METHOD_ALREADY_EXISTS_ERROR =
+			"More than one method with the same name found.";
 
     // This is a msg for an invalid method structure
     public static final String INVALID_METHOD_STRUCTURE_ERROR = "Invalid method structure";
@@ -252,7 +254,8 @@ public class Parser {
 			String methodName = methodMatcher.group(1);
 			Method method = MethodParser.getMethod(line, methodName);
 			if(methodsMap.get(methodName) != null) {
-				throw new InvalidMethodException(METHOD_ALREADY_EXISTS_ERROR + " | Line " + line.getSecond());
+				throw new InvalidMethodException(METHOD_ALREADY_EXISTS_ERROR + " | Line " +
+						line.getSecond());
 			}
 			methodsMap.put(methodName, method);
 			return true;
@@ -265,7 +268,7 @@ public class Parser {
 	 * @param line the line to match
 	 * @param block the block of the line
 	 * @return true iff there is a match
-	 * @throws VariableException
+	 * @throws VariableException in case trying to create a taken variable name
 	 */
 	private static boolean matchVariables(Tuple<String, Integer> line, Block block)
 			throws VariableException {

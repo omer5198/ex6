@@ -66,7 +66,7 @@ public class VariableValidator {
 	private static class VariableParser {
 
 		final static private String VAR_SPLIT_REGEX =
-				"\\b((?:_[A-Za-z_\\d]+|[A-Za-z]+[A-Za-z_\\d]*))(?:\\s*\\=\\s*(.+?))?\\s*[,;]";
+				"\\b((?:_[A-Za-z_\\d]+|[A-Za-z]+[A-Za-z_\\d]*))(?:\\s*=\\s*(.+?))?\\s*[,;]";
 
 		final static private Pattern VAR_SPLIT_PATTERN = Pattern.compile(VAR_SPLIT_REGEX);
 
@@ -203,7 +203,8 @@ public class VariableValidator {
 	}
 
 	static void compareTypes(String type1, String type2, String msgSuffix) throws VariableException {
-		if(!(type1.equals(type2) || type1.equals(BOOLEAN_ID) && (type2.equals(INT_ID) || type2.equals(DOUBLE_ID)) ||
+		if(!(type1.equals(type2) || type1.equals(BOOLEAN_ID) &&
+				(type2.equals(INT_ID) || type2.equals(DOUBLE_ID)) ||
 				type1.equals(DOUBLE_ID) && type2.equals(INT_ID))) {
 			throw new InvalidTypeException(UNMATCHING_TYPE_MSG + msgSuffix);
 		}

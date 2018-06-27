@@ -21,7 +21,8 @@ public class ConditionValidator {
 
 	final static private String INVALID_CONDITION_ERROR = "Invalid condition";
 
-	final static private String VAR_NOT_EXIST_ERROR = "Tried to use an uninitialized variable in a condition";
+	final static private String VAR_NOT_EXIST_ERROR = "Tried to use an " +
+			"uninitialized variable in a condition";
 
     private static class ConditionParser {
 
@@ -30,7 +31,8 @@ public class ConditionValidator {
                 ")?\\s*(.+?)\\s*(?:\\)|\\|\\||&&)+";
 
         // the pattern of the above regex
-		private static final Pattern CONDITION_GROUPING_PATTERN = Pattern.compile(CONDITION_GROUPING_REGEX);
+		private static final Pattern CONDITION_GROUPING_PATTERN =
+				Pattern.compile(CONDITION_GROUPING_REGEX);
 
         /**
          * This method returns all the parameters inside an if\while statement given a line of such.

@@ -11,8 +11,6 @@ import oop.ex6.main.parsing.InitialScanner;
 import oop.ex6.main.parsing.Parser;
 import oop.ex6.tools.Tuple;
 import oop.ex6.validators.Method;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -51,10 +51,6 @@ public class InitialScanner {
 	// error message for condition defined in outer scope
 	public static final String CONDITION_IN_OUTER_SCOPE_ERROR = "If / While found in global scope";
 
-    private HashMap<String, Variable> globalVariables; // we need this so that after foing initial scanning
-    // we would have access to the global variables since the global scope is not a block (and method returns
-    // list of blocks
-
     /**
      * This is the constructor of the class.
      * @param linesToScan The list of lines from the file. We receive these from the file reader.
@@ -96,15 +92,17 @@ public class InitialScanner {
 					}
 					currBlock.addLine(new Tuple<>(currLine, lineNumber));
 					blocksList.add(0, currBlock);
-					currBlock = currBlock.getParent(); // curBlock is null iff it is in the outer scope, there
-					// can be no closing of a block in the outer scope
+					/* curBlock is null iff it is in the outer scope,
+					there can be no closing of a block in the outer scope */
+					currBlock = currBlock.getParent();
 					addAtEnd = false;
 				} else {
 					addAtEnd = true;
 					// block opening
 					if (isLineIfOrWhile(currLine)) {
 						if(!isBlockInMethod(currBlock)) {
-							throw new ConditionInOuterScopeError(CONDITION_IN_OUTER_SCOPE_ERROR + msgSuffix);
+							throw new ConditionInOuterScopeError(
+									CONDITION_IN_OUTER_SCOPE_ERROR + msgSuffix);
 						}
 						temp = currBlock;
 						unclosedBlocks++;
@@ -130,7 +128,6 @@ public class InitialScanner {
         if(unclosedBlocks != 0){
             throw new InvalidBracketsException(INVALID_BRACKETS_STRUCT_ERROR);
         }
-        this.globalVariables = globalVariables;
 
         return new Tuple(globalBlock, blocksList);
     }

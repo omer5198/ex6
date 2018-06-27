@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * This class represents a block (scope) that a parser receives. This helps us deal with scopes of variables,
+ * This class represents a block (scope) that a parser receives.
+ * This helps us deal with scopes of variables,
  * for example when parsing through our file. Using this we can easily deal with local variables, etc.
  */
 public class Block {
@@ -83,9 +84,10 @@ public class Block {
 	}
 
 	/**
-	 * returns a variable object of a given name. If not in the current block, it will go up to outer blocks
-	 * (parents) and check if it is there.
-	 * @param name The name of the variable we search for, i.e check if it is defined somewhere in the block
+	 * returns a variable object of a given name. If not in the current block,
+	 * it will go up to outer blocks (ancestors) and check if it is there.
+	 * @param name The name of the variable we search for, i.e check if it is
+	 *                defined somewhere in the block
 	 * @return the variable object with the given name if it is defined in the block, null otherwise.
 	 */
 	public Variable getVariable(String name) {
@@ -100,9 +102,11 @@ public class Block {
 	}
 
 	/**
-	 * This method checks if there is a variable of a given name inside this specific block (local variable).
+	 * This method checks if there is a variable of a given name inside this
+	 * specific block (local variable).
 	 * @param name The given name of the variable
-	 * @return Either the variable object with the given name, null if there is no such variable in the block.
+	 * @return Either the variable object with the given name, null if there is no
+	 * such variable in the block.
 	 */
 	public Variable getLocalVariable(String name) {
     	return blockVariables.get(name);
